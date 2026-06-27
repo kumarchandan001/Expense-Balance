@@ -26,6 +26,7 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  background-color: #f4f6f8;
 }
 
 h1 {
@@ -63,4 +64,36 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+/* Add smooth transitions for interactive elements */
+button, a, .MuiChip-root {
+  transition: all 0.3s ease;
+}
+
+/* Add subtle hover effects */
+.MuiPaper-root:hover {
+  transform: translateY(-2px);
+  transition: transform 0.3s ease;
+}
+
+/* Enhance table styling */
+.MuiTableRow-root:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Add gradient backgrounds for status chips */
+.status-approved {
+  background: linear-gradient(45deg, #2e7d32 30%, #4caf50 90%);
+  color: white;
+}
+
+.status-pending {
+  background: linear-gradient(45deg, #ed6c02 30%, #ff9800 90%);
+  color: white;
+}
+
+.status-rejected {
+  background: linear-gradient(45deg, #d32f2f 30%, #ef5350 90%);
+  color: white;
 }

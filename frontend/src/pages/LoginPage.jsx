@@ -1,32 +1,52 @@
 // src/pages/LoginPage.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box, Paper, Avatar, Link } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { Link as RouterLink } from 'react-router-dom';
 import { loginUser } from '../services/api';
+import { useAuth } from '../services/AuthContext';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate(); // Initialize the hook
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     try {
+      setLoading(true);
+      setError('');
       const formData = { email, password };
       const { data } = await loginUser(formData);
       
-      console.log('Login successful:', data);
+      // Create user profile with token and role
+      const userProfile = {
+        token: data.token,
+        userId: data.userId,
+        role: data.role,
+        companyId: data.companyId
+      };
       
-      // Save the user's token/profile to the browser's local storage
-      localStorage.setItem('userProfile', JSON.stringify(data));
+      // Use the login function from AuthContext
+      login(userProfile);
       
-      // Redirect the user to the main dashboard page
-      navigate('/'); 
+      // Redirect based on user role
+      if (userProfile.role === 'admin') {
+        navigate('/admin');
+      } else if (userProfile.role === 'manager') {
+        navigate('/manager');
+      } else {
+        navigate('/');
+      }
       
     } catch (error) {
       console.error('Login failed:', error);
-      alert('Login Failed! Check console for details.');
+      setError(error.response?.data?.error || 'Invalid email or password');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,7 +79,7 @@ function LoginPage() {
               autoComplete="email"
               autoFocus
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setError(''); }}
             />
             <TextField
               margin="normal"
@@ -71,25 +91,27 @@ function LoginPage() {
               id="password"
               autoComplete="current-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); setError(''); }}
             />
+            {error && <Typography color="error" sx={{ mt: 1 }}>{error}</Typography>}
             <Button
               type="button"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
               onClick={handleLogin}
+              disabled={loading}
             >
-              Sign In
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Sign In"}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
                 <Link component={RouterLink} to="/signup" variant="body2">
                     {"Don't have an account? Sign Up"}
                 </Link>
-                <br />
+                {/* <br />
                 <Link href="#" variant="body2" sx={{ mt: 1, display: 'inline-block' }}>
                     Forgot password?
-                </Link>
+                </Link> */}
             </Box>
           </Box>
         </Paper>
